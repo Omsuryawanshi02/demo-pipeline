@@ -2,14 +2,13 @@ pipeline {
     agent any
 
     parameters { choice (name: 'ENVIRONMENT' ,
-                         choices: ['dev','staging','production']) }
+                         choices: ['staging','production']) }
     stages {
-        stage('approve') {
-            when { expression { params.ENVIRONMENT == 'production' } }
-            steps { input message: 'Deploy to production?' }
-        }
-        stage('Deploy') {
-            steps { bat "echo Deploy to ${params.ENVIRONMENT}" }
-        }
-    }
-}
+       stage ('checkout') { steps { checkout scm } }
+       stage ('quality') { parallel {
+           stage('build') { steps { bat 'echo build' } }
+           stage('Lint') { steps { bat 'echo Lint' } } }
+           stage('Test') { steps { bat 'echo Test' } }         
+           stage('package') { steps { bat 'echo package' } }
+       }
+    }   
